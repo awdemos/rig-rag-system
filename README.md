@@ -21,7 +21,6 @@ cd rig-rag-system
 
 2. Build the MVP:
 ```bash
-cd rag_mvp
 cargo build
 ```
 
@@ -44,20 +43,19 @@ cargo run --bin test_mvp
 
 ```
 rig-rag-system/
-├── rag_mvp/
-│   ├── Cargo.toml              # Dependencies and project configuration
-│   ├── src/
-│   │   ├── lib.rs              # Main library exports and tests
-│   │   ├── main.rs             # CLI interface
-│   │   ├── chunking.rs        # Document chunking strategies
-│   │   ├── processor.rs        # File processing
-│   │   ├── search.rs          # Search functionality
-│   │   ├── storage.rs          # In-memory storage
-│   │   └── evaluation.rs      # Quality evaluation
-│   ├── README.md               # MVP documentation
-│   └── Cargo.lock              # Dependency lock file
-├── test_mvp.rs                 # Integration test
-└── README.md                   # This file
+├── Cargo.toml                    # Dependencies and project configuration
+├── Cargo.lock                    # Dependency lock file
+├── src/
+│   ├── lib.rs                    # Main library exports and tests
+│   ├── main.rs                   # CLI interface
+│   ├── chunking.rs              # Document chunking strategies
+│   ├── processor.rs              # File processing
+│   ├── search.rs                # Search functionality
+│   ├── storage.rs                # In-memory storage
+│   └── evaluation.rs            # Quality evaluation
+├── test_mvp.rs                   # Integration test
+├── README.md                     # MVP documentation
+└── README.md                     # This file
 ```
 
 ## CLI Commands

@@ -5,7 +5,7 @@ edition = "2021"
 
 [[bin]]
 name = "test_mvp"
-path = "../test_mvp.rs"
+path = "test_mvp.rs"
 
 [dependencies]
 tokio = { version = "1.34.0", features = ["full"] }
