@@ -54,7 +54,6 @@ rig-rag-system/
 │   ├── storage.rs                # In-memory storage
 │   └── evaluation.rs            # Quality evaluation
 ├── test_mvp.rs                   # Integration test
-├── README.md                     # MVP documentation
 └── README.md                     # This file
 ```
 
