@@ -1,6 +1,6 @@
-# RAG System MVP
+# RAG System
 
-A minimal working RAG (Retrieval-Augmented Generation) system implementation that demonstrates core functionality.
+A working RAG (Retrieval-Augmented Generation) system implementation that demonstrates core functionality.
 
 ## Features
 
@@ -11,6 +11,14 @@ A minimal working RAG (Retrieval-Augmented Generation) system implementation tha
 - **Storage Management**: In-memory document and chunk storage
 - **CLI Interface**: Command-line interface for testing functionality
 
+## Supported Document Types
+
+The system currently supports **plain text files** with `.txt` extension. This includes:
+
+- `.txt` files - Standard text documents
+- `.md` files - Markdown documents (treated as plain text)
+- Any text-based file with content that can be read as UTF-8
+
 ## Quick Start
 
 1. Clone this repository:
@@ -19,24 +27,43 @@ git clone <repository-url>
 cd rig-rag-system
 ```
 
-2. Build the MVP:
+2. Build the system:
 ```bash
 cargo build
 ```
 
-3. Process a document:
+3. Process a text document:
 ```bash
-./target/debug/rag_mvp process path/to/document.txt
+./target/debug/rag-system process path/to/document.txt
 ```
 
 4. Search for content:
 ```bash
-./target/debug/rag_mvp search "your query"
+./target/debug/rag-system search "your query"
 ```
 
 5. Run the test suite:
 ```bash
-cargo run --bin test_mvp
+cargo run --bin test_rag
+```
+
+## Text File Processing
+
+The system handles text files by:
+- Reading the entire file content as UTF-8
+- Extracting metadata including file path, size, and word count
+- Supporting any text-based format that can be read as plain text
+- Preserving original formatting and structure during chunking
+
+### Example Text Files
+
+```
+# Supported file types:
+document.txt          # Standard text file
+notes.md             # Markdown file (treated as text)
+readme.txt           # Documentation
+research.txt        # Research papers
+article.txt          # Articles and essays
 ```
 
 ## Project Structure
@@ -61,40 +88,40 @@ rig-rag-system/
 
 #### Process a Document
 ```bash
-./target/debug/rag_mvp process path/to/document.txt
+./target/debug/rag-system process path/to/document.txt
 ```
 
 #### Search Documents
 ```bash
-./target/debug/rag_mvp search "your query" --limit 5
+./target/debug/rag-system search "your query" --limit 5
 ```
 
 #### Evaluate Search Quality
 ```bash
-./target/debug/rag_mvp evaluate "your query" --expected "doc1,doc2"
+./target/debug/rag-system evaluate "your query" --expected "doc1,doc2"
 ```
 
 #### List Processed Documents
 ```bash
-./target/debug/rag_mvp list
+./target/debug/rag-system list
 ```
 
 #### View Storage Statistics
 ```bash
-./target/debug/rag_mvp stats
+./target/debug/rag-system stats
 ```
 
 ## Testing
 
 Run the comprehensive test suite:
 ```bash
-cargo run --bin test_mvp
+cargo run --bin test_rag
 ```
 
 Example output:
 ```
-Testing MVP RAG System...
-✓ Created test file: /tmp/test_mvp.txt
+Testing RAG System...
+✓ Created test file: /tmp/test_rag.txt
 ✓ Created RAG system
 ✓ Processed document with ID: 626a6491-6794-4829-a8fc-7d00df52ea5c
 
@@ -119,9 +146,9 @@ Storage statistics:
 
 ## Architecture
 
-The MVP consists of these core components:
+The system consists of these core components:
 
-1. **DocumentProcessor**: Handles file reading and content extraction
+1. **DocumentProcessor**: Handles text file reading and content extraction
 2. **ChunkingEngine**: Splits documents into searchable chunks
 3. **SearchEngine**: Performs keyword-based search with scoring
 4. **StorageManager**: Manages in-memory storage of documents and chunks
@@ -131,14 +158,14 @@ The MVP consists of these core components:
 
 - **Storage**: Currently uses in-memory storage (no persistence between runs)
 - **Search**: Simple keyword matching without semantic understanding
-- **Document Types**: Only supports plain text files
+- **Document Types**: Only supports plain text files (.txt, .md, etc.)
 - **Scalability**: Designed for demonstration, not production use
 
 ## Next Steps
 
-This MVP provides a foundation for building a more comprehensive RAG system with:
+This system provides a foundation for building a more comprehensive RAG system with:
 - Persistent storage (SQLite, vector databases)
 - Advanced search algorithms (semantic search, embeddings)
-- Support for multiple document formats (PDF, Markdown, etc.)
+- Support for multiple document formats (PDF, structured files)
 - Production-ready error handling and logging
 - Performance optimization and caching

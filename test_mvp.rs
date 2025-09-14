@@ -1,11 +1,11 @@
-//! Test the MVP functionality in one session
+//! Test the RAG system functionality in one session
 
-use rag_mvp::SimpleRagSystem;
+use rag_system::SimpleRagSystem;
 use std::fs;
 use std::path::Path;
 
 fn main() -> anyhow::Result<()> {
-    println!("Testing MVP RAG System...");
+    println!("Testing RAG System...");
 
     // Create test content
     let test_content = r#"
@@ -29,7 +29,7 @@ Deep learning uses neural networks with multiple layers to learn hierarchical re
 "#;
 
     // Create temporary file
-    let test_file = "/tmp/test_mvp.txt";
+    let test_file = "/tmp/test_rag.txt";
     fs::write(test_file, test_content)?;
 
     println!("✓ Created test file: {}", test_file);

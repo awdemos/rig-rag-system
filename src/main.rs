@@ -1,13 +1,13 @@
-//! Simple CLI for the MVP RAG System
+//! Simple CLI for the RAG System
 
 use clap::{Parser, Subcommand};
 use std::path::Path;
 
-use rag_mvp::SimpleRagSystem;
+use rag_system::SimpleRagSystem;
 
 #[derive(Parser)]
-#[command(name = "rag-mvp")]
-#[command(about = "Simple RAG System MVP")]
+#[command(name = "rag-system")]
+#[command(about = "Simple RAG System")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

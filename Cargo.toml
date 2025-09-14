@@ -1,10 +1,10 @@
 [package]
-name = "rag_mvp"
+name = "rag_system"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "test_mvp"
+name = "test_rag"
 path = "test_mvp.rs"
 
 [dependencies]
