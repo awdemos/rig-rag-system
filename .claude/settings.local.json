@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(uvx:*)",
+      "WebSearch",
+      "Bash(cargo check:*)",
+      "Bash(timeout:*)",
+      "Bash(cargo build:*)",
+      "Bash(./target/debug/rag-mvp:*)",
+      "Bash(./target/debug/rag_mvp:*)",
+      "Bash(cargo run:*)",
+      "Bash(cargo test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

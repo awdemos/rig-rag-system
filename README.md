@@ -1,148 +1,147 @@
-# PDF-Based RAG System with Rig
+# RAG System MVP
 
-A Retrieval-Augmented Generation (RAG) system built in Rust using the Rig framework. This system processes PDF documents, generates embeddings, and enables interactive Q&A based on the document content.
+A minimal working RAG (Retrieval-Augmented Generation) system implementation that demonstrates core functionality.
 
 ## Features
 
-- PDF document processing with automatic chunking
-- OpenAI embeddings generation
-- In-memory vector store for document retrieval
-- Interactive CLI interface for Q&A
-- Context-aware responses using RAG
+- **Document Processing**: Processes text files and extracts content with metadata
+- **Chunking Strategies**: Fixed-size and paragraph-based chunking
+- **Search Functionality**: Simple keyword-based search with scoring
+- **Evaluation Framework**: Basic metrics for search quality assessment
+- **Storage Management**: In-memory document and chunk storage
+- **CLI Interface**: Command-line interface for testing functionality
 
-## Prerequisites
+## Quick Start
 
-- Rust (latest stable version)
-- An OpenAI API key
-- PDF documents in the `documents` directory
-
-## Setup
-
-1. Create a new Rust project:
+1. Clone this repository:
 ```bash
-cargo new rag_system
-cd rag_system
+git clone <repository-url>
+cd rig-rag-system
 ```
 
-2. Add the following dependencies to your `Cargo.toml`:
-```toml
-[dependencies]
-rig-core = { version = "0.5.0", features = ["pdf", "derive"] }
-tokio = { version = "1.34.0", features = ["full"] }
-anyhow = "1.0.75"
-serde = { version = "1.0", features = ["derive"] }
+2. Build the MVP:
+```bash
+cd rag_mvp
+cargo build
 ```
 
-3. Set up your OpenAI API key:
+3. Process a document:
 ```bash
-export OPENAI_API_KEY=your-api-key-here
+./target/debug/rag_mvp process path/to/document.txt
 ```
 
-4. Create a `documents` directory and add your PDF files:
+4. Search for content:
 ```bash
-mkdir documents
-# Add your PDF files to the documents directory
+./target/debug/rag_mvp search "your query"
+```
+
+5. Run the test suite:
+```bash
+cargo run --bin test_mvp
 ```
 
 ## Project Structure
 
 ```
-rag_system/
-├── Cargo.toml
-├── Cargo.lock
-├── documents/
-│   ├── document1.pdf
-│   └── document2.pdf
-└── src/
-    └── main.rs
+rig-rag-system/
+├── rag_mvp/
+│   ├── Cargo.toml              # Dependencies and project configuration
+│   ├── src/
+│   │   ├── lib.rs              # Main library exports and tests
+│   │   ├── main.rs             # CLI interface
+│   │   ├── chunking.rs        # Document chunking strategies
+│   │   ├── processor.rs        # File processing
+│   │   ├── search.rs          # Search functionality
+│   │   ├── storage.rs          # In-memory storage
+│   │   └── evaluation.rs      # Quality evaluation
+│   ├── README.md               # MVP documentation
+│   └── Cargo.lock              # Dependency lock file
+├── test_mvp.rs                 # Integration test
+└── README.md                   # This file
 ```
 
-## Code Overview
+## CLI Commands
 
-The system consists of several key components:
-
-### Document Structure
-```rust
-#[derive(Embed, Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
-struct Document {
-    id: String,
-    #[embed]
-    content: String,
-}
-```
-Represents a document chunk with a unique ID and content.
-
-### PDF Processing
-The `load_pdf` function:
-- Loads PDF content using Rig's built-in PDF loader
-- Splits content into manageable chunks (2000 characters each)
-- Maintains word boundaries while chunking
-- Handles errors gracefully
-
-### RAG Pipeline
-The main pipeline:
-1. Loads and chunks PDF documents
-2. Generates embeddings using OpenAI's text-embedding-ada-002 model
-3. Stores embeddings in an in-memory vector store
-4. Creates a RAG agent with dynamic context retrieval
-5. Provides an interactive CLI interface
-
-## Usage
-
-1. Build and run the project:
+#### Process a Document
 ```bash
-cargo run
+./target/debug/rag_mvp process path/to/document.txt
 ```
 
-2. Interact with the system through the CLI:
-```
-Welcome to the chatbot! Type 'exit' to quit.
-> Tell me about the main themes in the documents
-```
-
-3. Type 'exit' to quit the chatbot.
-
-## Customization
-
-### Chunk Size
-Adjust the chunk size by modifying the `chunk_size` variable in the `load_pdf` function:
-```rust
-let chunk_size = 2000;
+#### Search Documents
+```bash
+./target/debug/rag_mvp search "your query" --limit 5
 ```
 
-### Context Window
-Change the number of chunks used for context by modifying the `dynamic_context` parameter:
-```rust
-.dynamic_context(4, index)
+#### Evaluate Search Quality
+```bash
+./target/debug/rag_mvp evaluate "your query" --expected "doc1,doc2"
 ```
 
-### Model Selection
-Change the OpenAI model by modifying the model selection:
-```rust
-.agent("gpt-4") 
+#### List Processed Documents
+```bash
+./target/debug/rag_mvp list
 ```
 
-## Error Handling
+#### View Storage Statistics
+```bash
+./target/debug/rag_mvp stats
+```
 
-The system includes comprehensive error handling:
-- PDF loading errors
-- OpenAI API errors
-- Document processing errors
-- Embedding generation errors
+## Testing
 
-Errors are handled using the `anyhow` crate and include context for better debugging.
+Run the comprehensive test suite:
+```bash
+cargo run --bin test_mvp
+```
 
-## Advanced Features
+Example output:
+```
+Testing MVP RAG System...
+✓ Created test file: /tmp/test_mvp.txt
+✓ Created RAG system
+✓ Processed document with ID: 626a6491-6794-4829-a8fc-7d00df52ea5c
 
-### Document Chunking
-The system implements smart document chunking:
-- Preserves word boundaries
-- Prevents token limit issues
-- Enables processing of large documents
+Testing search functionality:
+Found 1 results for 'machine learning':
+  1. [Score: 1.000] # Machine Learning Basics...
 
-### Dynamic Context
-The RAG agent:
-- Retrieves relevant chunks based on query similarity
-- Synthesizes information from multiple chunks
-- Maintains context across questions
+Testing evaluation:
+Evaluation metrics:
+  Relevance: 1.000
+  Precision: 1.000
+  Recall: 1.000
+  F1 Score: 1.000
 
+Storage statistics:
+  Total Documents: 1
+  Total Chunks: 1
+  Total Size: 563 bytes
+
+✓ Test completed successfully!
+```
+
+## Architecture
+
+The MVP consists of these core components:
+
+1. **DocumentProcessor**: Handles file reading and content extraction
+2. **ChunkingEngine**: Splits documents into searchable chunks
+3. **SearchEngine**: Performs keyword-based search with scoring
+4. **StorageManager**: Manages in-memory storage of documents and chunks
+5. **Evaluator**: Calculates search quality metrics
+
+## Limitations
+
+- **Storage**: Currently uses in-memory storage (no persistence between runs)
+- **Search**: Simple keyword matching without semantic understanding
+- **Document Types**: Only supports plain text files
+- **Scalability**: Designed for demonstration, not production use
+
+## Next Steps
+
+This MVP provides a foundation for building a more comprehensive RAG system with:
+- Persistent storage (SQLite, vector databases)
+- Advanced search algorithms (semantic search, embeddings)
+- Support for multiple document formats (PDF, Markdown, etc.)
+- Production-ready error handling and logging
+- Performance optimization and caching

@@ -1,0 +1,854 @@
+openapi: 3.0.0
+info:
+  title: Enhanced RAG System API
+  description: API for document processing, retrieval, and conversation management
+  version: 0.2.0
+  contact:
+    name: Enhanced RAG System
+    email: dev@example.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  # Document Management
+  /documents:
+    post:
+      summary: Add new document
+      description: Process and index a new document (PDF, text, or web URL)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddDocumentRequest'
+      responses:
+        '201':
+          description: Document added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          description: Invalid request
+        '413':
+          description: File too large
+        '429':
+          description: Too many requests
+
+    get:
+      summary: List documents
+      description: Get list of all processed documents
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [pdf, text, web]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed, indexed]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Document'
+                  total:
+                    type: integer
+                  has_more:
+                    type: boolean
+
+  /documents/{document_id}:
+    get:
+      summary: Get document details
+      description: Get detailed information about a specific document
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '404':
+          description: Document not found
+
+    delete:
+      summary: Remove document
+      description: Remove a document and all its chunks from the system
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Document removed successfully
+        '404':
+          description: Document not found
+
+    post:
+      summary: Reindex document
+      description: Re-process and re-index a document
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document reindexing started
+        '404':
+          description: Document not found
+
+  /documents/{document_id}/chunks:
+    get:
+      summary: Get document chunks
+      description: Get all chunks for a specific document
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Document chunks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chunks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DocumentChunk'
+                  total:
+                    type: integer
+
+  # Query and Search
+  /query:
+    post:
+      summary: Query documents
+      description: Search across indexed documents and get answers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+      responses:
+        '200':
+          description: Query response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+        '400':
+          description: Invalid request
+
+  /search:
+    post:
+      summary: Search documents
+      description: Semantic search across document chunks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  # Conversation Management
+  /conversations:
+    post:
+      summary: Create conversation
+      description: Start a new conversation session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConversationRequest'
+      responses:
+        '201':
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationSession'
+
+    get:
+      summary: List conversations
+      description: Get list of conversation sessions
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConversationSession'
+                  total:
+                    type: integer
+
+  /conversations/{conversation_id}:
+    get:
+      summary: Get conversation
+      description: Get conversation details and messages
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationSession'
+        '404':
+          description: Conversation not found
+
+    post:
+      summary: Send message
+      description: Send a message in the conversation
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageRequest'
+      responses:
+        '200':
+          description: Message response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+    delete:
+      summary: Delete conversation
+      description: Delete a conversation session
+      parameters:
+        - name: conversation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Conversation deleted
+        '404':
+          description: Conversation not found
+
+  # Configuration Management
+  /config:
+    get:
+      summary: Get configuration
+      description: Get current system configuration
+      responses:
+        '200':
+          description: Current configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationProfile'
+
+    put:
+      summary: Update configuration
+      description: Update system configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurationProfile'
+      responses:
+        '200':
+          description: Configuration updated
+        '400':
+          description: Invalid configuration
+
+  /config/profiles:
+    post:
+      summary: Create configuration profile
+      description: Create a new configuration profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurationProfile'
+      responses:
+        '201':
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationProfile'
+
+    get:
+      summary: List configuration profiles
+      description: Get list of available configuration profiles
+      responses:
+        '200':
+          description: List of profiles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profiles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConfigurationProfile'
+
+  /config/profiles/{profile_id}:
+    put:
+      summary: Set active profile
+      description: Set a configuration profile as active
+      parameters:
+        - name: profile_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Profile activated
+        '404':
+          description: Profile not found
+
+  # System Information
+  /health:
+    get:
+      summary: Health check
+      description: System health status
+      responses:
+        '200':
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  version:
+                    type: string
+                    example: 0.2.0
+                  uptime:
+                    type: integer
+                    description: System uptime in seconds
+
+  /stats:
+    get:
+      summary: System statistics
+      description: Current system statistics and performance metrics
+      responses:
+        '200':
+          description: System statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  documents:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      indexed:
+                        type: integer
+                      processing:
+                        type: integer
+                      failed:
+                        type: integer
+                  chunks:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      with_embeddings:
+                        type: integer
+                  conversations:
+                    type: object
+                    properties:
+                      active:
+                        type: integer
+                      total:
+                        type: integer
+                  performance:
+                    type: object
+                    properties:
+                      memory_usage_mb:
+                        type: number
+                      avg_query_time_ms:
+                        type: number
+                      uptime_seconds:
+                        type: integer
+
+components:
+  schemas:
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        source_type:
+          type: string
+          enum: [pdf, text, web]
+        source_path:
+          type: string
+        title:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/DocumentMetadata'
+        processing_status:
+          type: string
+          enum: [pending, processing, completed, failed, indexed]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        file_size:
+          type: integer
+        chunk_count:
+          type: integer
+
+    DocumentMetadata:
+      type: object
+      properties:
+        page_count:
+          type: integer
+        author:
+          type: string
+        domain:
+          type: string
+        crawl_date:
+          type: string
+          format: date-time
+        language:
+          type: string
+        encoding:
+          type: string
+
+    DocumentChunk:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        document_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+        chunk_type:
+          type: string
+          enum: [fixed_size, paragraph, semantic, heading]
+        position:
+          type: integer
+        word_count:
+          type: integer
+        metadata:
+          $ref: '#/components/schemas/ChunkMetadata'
+        created_at:
+          type: string
+          format: date-time
+
+    ChunkMetadata:
+      type: object
+      properties:
+        page_number:
+          type: integer
+        section:
+          type: string
+        heading_level:
+          type: integer
+        url_fragment:
+          type: string
+
+    ConversationSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        last_activity:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationMessage'
+        context_window:
+          type: integer
+        document_filter:
+          type: array
+          items:
+            type: string
+        metadata:
+          $ref: '#/components/schemas/SessionMetadata'
+
+    ConversationMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChunkReference'
+
+    ChunkReference:
+      type: object
+      properties:
+        chunk_id:
+          type: string
+          format: uuid
+        document_id:
+          type: string
+          format: uuid
+        relevance_score:
+          type: number
+          format: float
+        excerpt:
+          type: string
+
+    SessionMetadata:
+      type: object
+      properties:
+        total_messages:
+          type: integer
+        total_documents_queried:
+          type: integer
+        average_response_time:
+          type: number
+        session_duration:
+          type: number
+          format: float
+
+    ConfigurationProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        is_default:
+          type: boolean
+        document_processing:
+          $ref: '#/components/schemas/DocumentProcessingConfig'
+        chunking:
+          $ref: '#/components/schemas/ChunkingConfig'
+        retrieval:
+          $ref: '#/components/schemas/RetrievalConfig'
+        conversation:
+          $ref: '#/components/schemas/ConversationConfig'
+        openai:
+          $ref: '#/components/schemas/OpenAIConfig'
+        logging:
+          $ref: '#/components/schemas/LoggingConfig'
+        performance:
+          $ref: '#/components/schemas/PerformanceConfig'
+
+    DocumentProcessingConfig:
+      type: object
+      properties:
+        max_file_size:
+          type: integer
+        supported_formats:
+          type: array
+          items:
+            type: string
+        web_timeout:
+          type: string
+        max_concurrent_downloads:
+          type: integer
+        user_agent:
+          type: string
+
+    ChunkingConfig:
+      type: object
+      properties:
+        default_strategy:
+          type: string
+          enum: [fixed_size, paragraph, semantic, heading]
+        chunk_size:
+          type: integer
+        overlap_size:
+          type: integer
+        respect_sentence_boundaries:
+          type: boolean
+        respect_paragraph_boundaries:
+          type: boolean
+        max_chunks_per_document:
+          type: integer
+
+    RetrievalConfig:
+      type: object
+      properties:
+        max_results:
+          type: integer
+        similarity_threshold:
+          type: number
+          format: float
+        boost_recent_documents:
+          type: boolean
+        cross_document_retrieval:
+          type: boolean
+
+    ConversationConfig:
+      type: object
+      properties:
+        max_context_messages:
+          type: integer
+        max_session_duration:
+          type: string
+        auto_save:
+          type: boolean
+        include_sources:
+          type: boolean
+        temperature:
+          type: number
+          format: float
+
+    OpenAIConfig:
+      type: object
+      properties:
+        model:
+          type: string
+        embedding_model:
+          type: string
+        max_tokens:
+          type: integer
+        request_timeout:
+          type: string
+
+    LoggingConfig:
+      type: object
+      properties:
+        level:
+          type: string
+          enum: [debug, info, warn, error]
+        format:
+          type: string
+          enum: [json, text]
+        file_path:
+          type: string
+        max_file_size:
+          type: integer
+
+    PerformanceConfig:
+      type: object
+      properties:
+        max_memory_usage:
+          type: integer
+        embedding_batch_size:
+          type: integer
+        cache_embeddings:
+          type: boolean
+        parallel_processing:
+          type: boolean
+
+    AddDocumentRequest:
+      type: object
+      properties:
+        source:
+          type: string
+          description: File path or URL
+        source_type:
+          type: string
+          enum: [pdf, text, web]
+        title:
+          type: string
+        chunking_strategy:
+          type: string
+          enum: [fixed_size, paragraph, semantic, heading]
+        chunk_size:
+          type: integer
+        overlap_size:
+          type: integer
+
+    QueryRequest:
+      type: object
+      properties:
+        query:
+          type: string
+          description: The user's question or query
+        conversation_id:
+          type: string
+          description: Optional conversation ID for context
+        document_ids:
+          type: array
+          items:
+            type: string
+          description: Optional list of document IDs to search
+        max_results:
+          type: integer
+          description: Maximum number of results to return
+        temperature:
+          type: number
+          description: LLM temperature for response generation
+
+    QueryResponse:
+      type: object
+      properties:
+        answer:
+          type: string
+          description: The generated answer
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChunkReference'
+          description: Source chunks used for the answer
+        conversation_id:
+          type: string
+          description: Conversation ID for follow-up questions
+        processing_time_ms:
+          type: integer
+          description: Time taken to generate response
+
+    SearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+        document_ids:
+          type: array
+          items:
+            type: string
+        max_results:
+          type: integer
+        similarity_threshold:
+          type: number
+        filters:
+          type: object
+
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScoredChunk'
+        total:
+          type: integer
+        search_time_ms:
+          type: integer
+
+    ScoredChunk:
+      type: object
+      properties:
+        chunk:
+          $ref: '#/components/schemas/DocumentChunk'
+        score:
+          type: number
+        rank:
+          type: integer
+        highlights:
+          type: array
+          items:
+            type: string
+
+    CreateConversationRequest:
+      type: object
+      properties:
+        document_filter:
+          type: array
+          items:
+            type: string
+        context_window:
+          type: integer
+        max_session_duration:
+          type: string
+
+    MessageRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        include_sources:
+          type: boolean
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          $ref: '#/components/schemas/ConversationMessage'
+        processing_time_ms:
+          type: integer
